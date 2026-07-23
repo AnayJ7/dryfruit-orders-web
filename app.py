@@ -178,6 +178,22 @@ def advance_order():
         st.session_state["order_status_message"] = f"Order #{order_id} advanced to {nxt}."
 
 
+def request_delete_order():
+    st.session_state["confirm_delete_order_id"] = st.session_state["selected_order_id"]
+
+
+def cancel_delete_order():
+    st.session_state["confirm_delete_order_id"] = None
+
+
+def confirm_delete_order():
+    order_id = st.session_state["confirm_delete_order_id"]
+    db.delete_order(order_id)
+    st.session_state["confirm_delete_order_id"] = None
+    st.session_state.pop("selected_order_id", None)
+    st.session_state["order_status_message"] = f"Order #{order_id} deleted."
+
+
 @st.fragment(run_every="5s")
 def orders_tab():
     st.caption("Auto-refreshes every 5s so updates from other devices show up here.")
@@ -229,6 +245,22 @@ def orders_tab():
     if st.session_state.get("order_status_message"):
         st.success(st.session_state["order_status_message"])
         st.session_state["order_status_message"] = None
+
+    st.divider()
+    if st.session_state.get("confirm_delete_order_id") == selected_order["id"]:
+        st.warning(
+            f"Delete order #{selected_order['id']} for {selected_order['customer_name']}? "
+            "This cannot be undone."
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            st.button(
+                "Confirm Delete", type="primary", on_click=confirm_delete_order
+            )
+        with col2:
+            st.button("Cancel", on_click=cancel_delete_order)
+    else:
+        st.button("Delete Order", on_click=request_delete_order)
 
 
 # ------------------------------------------------------------ customers ---

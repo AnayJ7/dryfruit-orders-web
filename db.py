@@ -212,6 +212,15 @@ def update_order_status(order_id, new_status):
         session.close()
 
 
+def delete_order(order_id):
+    session = get_session()
+    try:
+        session.query(Order).filter_by(id=order_id).delete()
+        session.commit()
+    finally:
+        session.close()
+
+
 def customer_stats():
     session = get_session()
     try:
