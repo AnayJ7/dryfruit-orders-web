@@ -178,7 +178,9 @@ def advance_order():
         st.session_state["order_status_message"] = f"Order #{order_id} advanced to {nxt}."
 
 
+@st.fragment(run_every="5s")
 def orders_tab():
+    st.caption("Auto-refreshes every 5s so updates from other devices show up here.")
     orders = db.list_orders()
     if not orders:
         st.info("No orders yet -- create one in the New Order tab.")
@@ -231,7 +233,9 @@ def orders_tab():
 
 # ------------------------------------------------------------ customers ---
 
+@st.fragment(run_every="5s")
 def customers_tab():
+    st.caption("Auto-refreshes every 5s so updates from other devices show up here.")
     stats = db.customer_stats()
     if not stats:
         st.info("No customers yet.")
