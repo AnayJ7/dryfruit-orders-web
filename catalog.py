@@ -7,31 +7,17 @@ Kept identical to dryfruit_orders/catalog.py so both apps behave the same.
 """
 
 CATALOG = {
-    "Almonds (Badam)": {
-        "California": [],
-        "Mamra": [],
-        "Gurbandi": [],
+    "Badam (Almond)": {
+        "Slice": [],
+        "Stick": [],
+        "3pcs": [],
+        "2pcs": [],
+        "Powder": [],
+        "BB": [],
     },
-    "Cashews (Kaju)": {
-        "W180": [],
-        "W240": [],
-        "W320": [],
-    },
-    "Pistachios (Pista)": {
-        "Iranian": ["Grade A", "Grade B", "Grade C"],
-        "American": ["Grade A", "Grade B"],
-    },
-    "Walnuts (Akhrot)": {
-        "Kashmiri": [],
-        "Chandler": [],
-    },
-    "Raisins (Kishmish)": {
-        "Green": ["Premium", "Standard"],
-        "Black": [],
-    },
-    "Dates (Khajur)": {
-        "Medjool": ["Grade A", "Grade B"],
-        "Kimia": [],
+    "Pista (Pistachio)": {
+        "Slice": ["IR (Iranian)", "AG (Afghan/American Grade)"],
+        "Stick": ["IR (Iranian)"],
     },
 }
 
