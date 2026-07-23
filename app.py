@@ -198,69 +198,75 @@ def confirm_delete_order():
 def orders_tab():
     st.caption("Auto-refreshes every 5s so updates from other devices show up here.")
     orders = db.list_orders()
-    if not orders:
-        st.info("No orders yet -- create one in the New Order tab.")
-        return
 
-    def fmt(dt):
-        return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
+    # Rendered into a single placeholder so a run that produces fewer
+    # elements than the previous one (e.g. the order list becoming empty)
+    # fully replaces prior content instead of leaving stale widgets behind.
+    slot = st.empty()
+    with slot.container():
+        if not orders:
+            st.info("No orders yet -- create one in the New Order tab.")
+            return
 
-    rows = []
-    for o in orders:
-        product = f"{o['category']} / {o['variant']}"
-        if o["grade"]:
-            product += f" / {o['grade']}"
-        rows.append(
-            {
-                "Order #": o["id"],
-                "Customer": f"{o['customer_name']} ({o['customer_phone']})",
-                "Product": product,
-                "Weight (kg)": o["weight_kg"],
-                "Status": o["status"],
-                "Created": fmt(o["created_at"]),
-                "Dispatched": fmt(o["dispatched_at"]),
-                "Delivered": fmt(o["delivered_at"]),
-            }
-        )
-    st.dataframe(rows, width="stretch", hide_index=True)
+        def fmt(dt):
+            return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
 
-    st.subheader("Update Order Status")
-    order_ids = [o["id"] for o in orders]
-    if st.session_state.get("selected_order_id") not in order_ids:
-        st.session_state["selected_order_id"] = order_ids[0]
-    st.selectbox("Order #", order_ids, key="selected_order_id")
-
-    selected_order = next(
-        o for o in orders if o["id"] == st.session_state["selected_order_id"]
-    )
-    current_status = selected_order["status"]
-    nxt = db.next_status(current_status)
-
-    st.write(f"Current status: **{current_status}**")
-    if nxt:
-        st.button(f"Advance to {nxt}", on_click=advance_order)
-    else:
-        st.success("Order fully delivered.")
-
-    if st.session_state.get("order_status_message"):
-        st.success(st.session_state["order_status_message"])
-        st.session_state["order_status_message"] = None
-
-    st.divider()
-    if st.session_state.get("confirm_delete_order_id") == selected_order["id"]:
-        st.warning(
-            f"Delete order #{selected_order['id']} for {selected_order['customer_name']}? "
-            "This cannot be undone."
-        )
-        col1, col2 = st.columns(2)
-        with col1:
-            st.button(
-                "Confirm Delete", type="primary", on_click=confirm_delete_order
+        rows = []
+        for o in orders:
+            product = f"{o['category']} / {o['variant']}"
+            if o["grade"]:
+                product += f" / {o['grade']}"
+            rows.append(
+                {
+                    "Order #": o["id"],
+                    "Customer": f"{o['customer_name']} ({o['customer_phone']})",
+                    "Product": product,
+                    "Weight (kg)": o["weight_kg"],
+                    "Status": o["status"],
+                    "Created": fmt(o["created_at"]),
+                    "Dispatched": fmt(o["dispatched_at"]),
+                    "Delivered": fmt(o["delivered_at"]),
+                }
             )
-        with col2:
-            st.button("Cancel", on_click=cancel_delete_order)
-    else:
-        st.button("Delete Order", on_click=request_delete_order)
+        st.dataframe(rows, width="stretch", hide_index=True)
+
+        st.subheader("Update Order Status")
+        order_ids = [o["id"] for o in orders]
+        if st.session_state.get("selected_order_id") not in order_ids:
+            st.session_state["selected_order_id"] = order_ids[0]
+        st.selectbox("Order #", order_ids, key="selected_order_id")
+
+        selected_order = next(
+            o for o in orders if o["id"] == st.session_state["selected_order_id"]
+        )
+        current_status = selected_order["status"]
+        nxt = db.next_status(current_status)
+
+        st.write(f"Current status: **{current_status}**")
+        if nxt:
+            st.button(f"Advance to {nxt}", on_click=advance_order)
+        else:
+            st.success("Order fully delivered.")
+
+        if st.session_state.get("order_status_message"):
+            st.success(st.session_state["order_status_message"])
+            st.session_state["order_status_message"] = None
+
+        st.divider()
+        if st.session_state.get("confirm_delete_order_id") == selected_order["id"]:
+            st.warning(
+                f"Delete order #{selected_order['id']} for "
+                f"{selected_order['customer_name']}? This cannot be undone."
+            )
+            col1, col2 = st.columns(2)
+            with col1:
+                st.button(
+                    "Confirm Delete", type="primary", on_click=confirm_delete_order
+                )
+            with col2:
+                st.button("Cancel", on_click=cancel_delete_order)
+        else:
+            st.button("Delete Order", on_click=request_delete_order)
 
 
 # ------------------------------------------------------------ customers ---
@@ -269,19 +275,22 @@ def orders_tab():
 def customers_tab():
     st.caption("Auto-refreshes every 5s so updates from other devices show up here.")
     stats = db.customer_stats()
-    if not stats:
-        st.info("No customers yet.")
-        return
-    rows = [
-        {
-            "Name": c["name"],
-            "Phone": c["phone"],
-            "Order Count": c["order_count"],
-            "Total Weight (kg)": c["total_weight_kg"],
-        }
-        for c in stats
-    ]
-    st.dataframe(rows, width="stretch", hide_index=True)
+
+    slot = st.empty()
+    with slot.container():
+        if not stats:
+            st.info("No customers yet.")
+            return
+        rows = [
+            {
+                "Name": c["name"],
+                "Phone": c["phone"],
+                "Order Count": c["order_count"],
+                "Total Weight (kg)": c["total_weight_kg"],
+            }
+            for c in stats
+        ]
+        st.dataframe(rows, width="stretch", hide_index=True)
 
 
 # ------------------------------------------------------------------ main --
